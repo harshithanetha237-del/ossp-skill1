@@ -1,0 +1,35 @@
+} else if (pid == 0) {
+            // ---------- CHILD PROCESS ----------
+            printf("[Child]  PID = %d, Parent PID = %d\n", getpid(), getppid());
+            printf("[Child]  Executing command: %s\n\n", input);
+
+            // Step 3: Execute the command using execvp()
+            // execvp() replaces the child's memory image with the new program.
+            // It searches PATH automatically (that's why we use the 'p' variant).
+            execvp(args[0], args);
+
+            // If execvp() returns at all, it means it FAILED
+            fprintf(stderr, "execvp failed: command '%s' not found\n", args[0]);
+            exit(EXIT_FAILURE);
+
+        } else {
+            // ---------- PARENT PROCESS ----------
+            int status;
+            printf("[Parent] PID = %d, Created Child PID = %d\n", getpid(), pid);
+
+            // Step 4: Wait for the child to finish
+            pid_t terminated_pid = wait(&status);
+
+            // Step 5 (reporting): show exit status details
+            if (WIFEXITED(status)) {
+                printf("[Parent] Child (PID = %d) exited normally with status %d\n",
+                       terminated_pid, WEXITSTATUS(status));
+            } else if (WIFSIGNALED(status)) {
+                printf("[Parent] Child (PID = %d) was killed by signal %d\n",
+                       terminated_pid, WTERMSIG(status));
+            }
+        }
+    }
+
+    return 0;
+}
